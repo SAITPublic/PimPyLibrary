@@ -1,5 +1,6 @@
 #include <pim_runtime_api.h>
 #include <pybind11/pybind11.h>
+#include "half.hpp"
 
 namespace py = pybind11;
 
@@ -51,13 +52,27 @@ PYBIND11_MODULE(pim_api, api_interface)
         .export_values();
 
     py::class_<PimBShape>(api_interface, "PimBShape");
-    py::class_<PimBo>(api_interface, "PimBo");
+    py::class_<PimBo>(api_interface, "PimBo", py::buffer_protocol()).def_buffer([](PimBo& bo) -> py::buffer_info {
+        return py::buffer_info(
+            bo.data,                                              /* Pointer to buffer */
+            sizeof(half_float::half),                             /* Size of one scalar */
+            "e",                                                  /* Python struct-style format descriptor */
+            4,                                                    /* Number of dimensions */
+            {bo.bshape.n, bo.bshape.c, bo.bshape.h, bo.bshape.w}, /* Buffer dimensions */
+            {sizeof(half_float::half) * bo.bshape.c * bo.bshape.h * bo.bshape.w, /* Strides (in bytes) for each index */
+             sizeof(half_float::half) * bo.bshape.h * bo.bshape.w, sizeof(half_float::half) * bo.bshape.w,
+             sizeof(half_float::half)});
+    });
+
     py::class_<PimDesc>(api_interface, "PimDesc");
     py::class_<PimGemvBundle>(api_interface, "PimGemvBundle");
 
     api_interface.def("PimInitialize", &PimInitialize, "For initialization of pim data",
                       py::arg("rt_type") = RT_TYPE_HIP, py::arg("PimPrecision") = PIM_FP16);
     api_interface.def("PimDeinitialize", &PimDeinitialize, "For de initialization of pim data");
+    api_interface.def("PimCreateBo",
+                      static_cast<PimBo* (*)(int, int, int, int, PimPrecision, PimMemType, void*)>(&PimCreateBo),
+                      "For Creating PimBo memory object using nchw values");
     api_interface.def("PimCreateBo", static_cast<PimBo* (*)(PimDesc*, PimMemType, PimMemFlag, void*)>(&PimCreateBo),
                       "For Creating PimBo memory object", py::arg("pim_desc"), py::arg("mem_type"),
                       py::arg("mem_flag") = ELT_OP, py::arg("user_ptr") = nullptr);
