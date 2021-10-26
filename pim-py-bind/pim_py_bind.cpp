@@ -1,8 +1,14 @@
 #include <pim_runtime_api.h>
 #include <pybind11/pybind11.h>
+#include <iostream>
 #include "half.hpp"
-
 namespace py = pybind11;
+
+PimBo* PyWrapperPimCreateBo(int n, int c, int h, int w, PimPrecision prec, PimMemType mem, uintptr_t usr_ptr)
+{
+    void* user = (usr_ptr == 0) ? nullptr : (void*)usr_ptr;
+    return PimCreateBo(n, c, h, w, prec, mem, user);
+}
 
 PYBIND11_MODULE(pim_api, api_interface)
 {
@@ -70,9 +76,7 @@ PYBIND11_MODULE(pim_api, api_interface)
     api_interface.def("PimInitialize", &PimInitialize, "For initialization of pim data",
                       py::arg("rt_type") = RT_TYPE_HIP, py::arg("PimPrecision") = PIM_FP16);
     api_interface.def("PimDeinitialize", &PimDeinitialize, "For de initialization of pim data");
-    api_interface.def("PimCreateBo",
-                      static_cast<PimBo* (*)(int, int, int, int, PimPrecision, PimMemType, void*)>(&PimCreateBo),
-                      "For Creating PimBo memory object using nchw values");
+    api_interface.def("PimCreateBo", &PyWrapperPimCreateBo, "For Creating PimBo memory object using nchw values");
     api_interface.def("PimCreateBo", static_cast<PimBo* (*)(PimDesc*, PimMemType, PimMemFlag, void*)>(&PimCreateBo),
                       "For Creating PimBo memory object", py::arg("pim_desc"), py::arg("mem_type"),
                       py::arg("mem_flag") = ELT_OP, py::arg("user_ptr") = nullptr);
