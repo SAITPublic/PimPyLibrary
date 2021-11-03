@@ -16,4 +16,8 @@ pip3 install --trusted-host 'pypi.org' ./PimPyLib
 ## Tests
 `tests` folder contains python test scripts for testing python bindings
 ### example
-`python3 elt_add.py`
+For all tests
+`python3 -m unittest unittests/test_*`
+
+For Individual tests
+`python3 -m unittest unittests/test_elt_add.py`

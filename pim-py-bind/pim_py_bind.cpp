@@ -4,10 +4,22 @@
 #include "half.hpp"
 namespace py = pybind11;
 
-PimBo* PyWrapperPimCreateBo(int n, int c, int h, int w, PimPrecision prec, PimMemType mem, uintptr_t usr_ptr)
+PimBo* PyWrapperPimCreateBoNCHW(int n, int c, int h, int w, PimPrecision prec, PimMemType mem, uintptr_t usr_ptr)
 {
     void* user = (usr_ptr == 0) ? nullptr : (void*)usr_ptr;
     return PimCreateBo(n, c, h, w, prec, mem, user);
+}
+
+PimBo* PyWrapperPimCreateBoDesc(PimDesc* desc, PimMemType mem, PimMemFlag mflag, uintptr_t usr_ptr)
+{
+    void* user = (usr_ptr == 0) ? nullptr : (void*)usr_ptr;
+    return PimCreateBo(desc, mem, mflag, user);
+}
+
+int PyWrapperPimAllocMemory(uintptr_t usr_ptr, size_t size, PimMemType mem)
+{
+    void* user = (usr_ptr == 0) ? nullptr : (void*)usr_ptr;
+    return PimAllocMemory(&user, size, mem);
 }
 
 PYBIND11_MODULE(pim_api, api_interface)
@@ -57,8 +69,19 @@ PYBIND11_MODULE(pim_api, api_interface)
         .value("PIM_INT8", PIM_INT8)
         .export_values();
 
-    py::class_<PimBShape>(api_interface, "PimBShape");
+    py::class_<PimBShape>(api_interface, "PimBShape")
+        .def(py::init<>())
+        .def_readwrite("w", &PimBShape::w)
+        .def_readwrite("h", &PimBShape::h)
+        .def_readwrite("c", &PimBShape::c)
+        .def_readwrite("n", &PimBShape::n);
+
     py::class_<PimBo>(api_interface, "PimBo", py::buffer_protocol()).def_buffer([](PimBo& bo) -> py::buffer_info {
+        py::capsule FreePimBo(bo.data, [](void* py_usr_ptr) {
+            PimBo* pimbo = reinterpret_cast<PimBo*>(py_usr_ptr);
+            PimDestroyBo(pimbo);
+        });
+
         return py::buffer_info(
             bo.data,                                              /* Pointer to buffer */
             sizeof(half_float::half),                             /* Size of one scalar */
@@ -70,20 +93,25 @@ PYBIND11_MODULE(pim_api, api_interface)
              sizeof(half_float::half)});
     });
 
-    py::class_<PimDesc>(api_interface, "PimDesc");
+    py::class_<PimDesc>(api_interface, "PimDesc")
+        .def(py::init<>())
+        .def_readwrite("bshape", &PimDesc::bshape)
+        .def_readwrite("precision", &PimDesc::precision)
+        .def_readwrite("op_type", &PimDesc::op_type)
+        .def_readonly("bshape_r", &PimDesc::bshape_r);
+
     py::class_<PimGemvBundle>(api_interface, "PimGemvBundle");
 
     api_interface.def("PimInitialize", &PimInitialize, "For initialization of pim data",
                       py::arg("rt_type") = RT_TYPE_HIP, py::arg("PimPrecision") = PIM_FP16);
     api_interface.def("PimDeinitialize", &PimDeinitialize, "For de initialization of pim data");
-    api_interface.def("PimCreateBo", &PyWrapperPimCreateBo, "For Creating PimBo memory object using nchw values");
-    api_interface.def("PimCreateBo", static_cast<PimBo* (*)(PimDesc*, PimMemType, PimMemFlag, void*)>(&PimCreateBo),
-                      "For Creating PimBo memory object", py::arg("pim_desc"), py::arg("mem_type"),
-                      py::arg("mem_flag") = ELT_OP, py::arg("user_ptr") = nullptr);
+    api_interface.def("PimCreateBo", &PyWrapperPimCreateBoNCHW, "For Creating PimBo memory object using nchw values");
+    api_interface.def("PimCreateBo", &PyWrapperPimCreateBoDesc, "For Creating PimBo memory object", py::arg("desc"),
+                      py::arg("mem"), py::arg("mflag") = ELT_OP, py::arg("usr_ptr") = 0);
     api_interface.def("PimDestroyBo", &PimDestroyBo);
     api_interface.def("PimCreateDesc", &PimCreateDesc);
     api_interface.def("PimDestroyDesc", &PimDestroyDesc);
-    // api_interface.def("PimAllocMemory", static_cast<int (*)(void** ptr, size_t, PimMemType)>(&PimAllocMemory));
+    api_interface.def("PimAllocMemory", &PyWrapperPimAllocMemory);
     api_interface.def("PimAllocMemory", static_cast<int (*)(PimBo*)>(&PimAllocMemory));
     api_interface.def("PimFreeMemory", static_cast<int (*)(void*, PimMemType)>(&PimFreeMemory));
     api_interface.def("PimFreeMemory", static_cast<int (*)(PimBo*)>(&PimFreeMemory));
