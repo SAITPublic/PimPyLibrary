@@ -7,7 +7,7 @@ namespace py = pybind11;
 PimBo* PyWrapperPimCreateBoNCHW(int n, int c, int h, int w, PimPrecision prec, PimMemType mem, uintptr_t usr_ptr)
 {
     void* user = (usr_ptr == 0) ? nullptr : (void*)usr_ptr;
-    return PimCreateBo(n, c, h, w, prec, mem, user);
+    return PimCreateBo(w, h, c, n, prec, mem, user);
 }
 
 PimBo* PyWrapperPimCreateBoDesc(PimDesc* desc, PimMemType mem, PimMemFlag mflag, uintptr_t usr_ptr)
@@ -100,7 +100,7 @@ PYBIND11_MODULE(pim_api, api_interface)
         .def_readwrite("op_type", &PimDesc::op_type)
         .def_readonly("bshape_r", &PimDesc::bshape_r);
 
-    py::class_<PimGemvBundle>(api_interface, "PimGemvBundle");
+    //py::class_<PimGemvBundle>(api_interface, "PimGemvBundle");
 
     api_interface.def("PimInitialize", &PimInitialize, "For initialization of pim data",
                       py::arg("rt_type") = RT_TYPE_HIP, py::arg("PimPrecision") = PIM_FP16);

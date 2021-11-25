@@ -9,3 +9,5 @@ add_library(pim_api MODULE pim-py-bind/pim_py_bind.cpp)
 target_link_libraries(pim_api PRIVATE pybind11::module pybind11::lto PimRuntime)
 pybind11_extension(pim_api)
 pybind11_strip(pim_api)
+
+add_subdirectory(custom-ops/pytorch)

@@ -3,22 +3,36 @@ import torch.nn as nn
 from torch.autograd import Function
 import pim_api
 
-#Todo , broadcasting logic
+# Todo , broadcasting logic
+
 
 class PimEltwiseFunction(Function):
     @staticmethod
     def forward(ctx, input1, input2, operation):
 
+        if input1.size() != input2.size():
+            if operation == 0:
+                return torch.add(input1, input2)
+            if operation == 1:
+                return torch.mul(input1, input2)
+
         length = torch.numel(input1)
-        out_tensor = torch.empty(input1.size(),dtype=torch.float16,device=input1.device)
+        out_tensor = torch.empty(
+            input1.size(), dtype=torch.float16, device=input1.device)
 
-        dev_input1 = pim_api.PimCreateBo(length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, input1.data_ptr())
-        dev_input2 = pim_api.PimCreateBo(length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, input2.data_ptr())
-        dev_output = pim_api.PimCreateBo(length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, out_tensor.data_ptr())
+        dev_input1 = pim_api.PimCreateBo(
+            length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, input1.data_ptr())
+        dev_input2 = pim_api.PimCreateBo(
+            length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, input2.data_ptr())
+        dev_output = pim_api.PimCreateBo(
+            length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, out_tensor.data_ptr())
 
-        pim_input1 = pim_api.PimCreateBo(length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM,0)
-        pim_input2 = pim_api.PimCreateBo(length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM,0)
-        pim_output = pim_api.PimCreateBo(length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM,0)
+        pim_input1 = pim_api.PimCreateBo(
+            length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0)
+        pim_input2 = pim_api.PimCreateBo(
+            length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0)
+        pim_output = pim_api.PimCreateBo(
+            length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0)
 
         pim_api.PimCopyMemory(pim_input1, dev_input1, pim_api.DEVICE_TO_PIM)
         pim_api.PimCopyMemory(pim_input2, dev_input2, pim_api.DEVICE_TO_PIM)
@@ -39,13 +53,14 @@ class PimEltwiseFunction(Function):
 class PimEltwise(nn.Module):
     """A nn.module wrapper for py_pim_eltwise function.
     """
+
     def __init__(self, operation=0):
         super(PimEltwise, self).__init__()
         self.operation = operation
         if operation:
-            self.op_t = torch.tensor([1], dtype=torch.int32)  #mul
+            self.op_t = torch.tensor([1], dtype=torch.int32)  # mul
         else:
-            self.op_t = torch.tensor([0], dtype=torch.int32)  #add
+            self.op_t = torch.tensor([0], dtype=torch.int32)  # add
 
     def __repr__(self):
         if self.operation:
@@ -55,4 +70,3 @@ class PimEltwise(nn.Module):
 
     def forward(self, input1, input2):
         return PimEltwiseFunction.apply(input1, input2, self.op_t)
-
