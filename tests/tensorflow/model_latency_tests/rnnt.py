@@ -16,7 +16,7 @@ import timeit
 import argparse
 from tabulate import tabulate
 import os
-import tf_pim_ops
+import pim_tf as tf_pim_ops
 
 """   [rnnt] config info """
 encoder_n_hidden = 1024

@@ -3,6 +3,8 @@ import numpy as np
 import timeit
 import os
 from tabulate import tabulate
+import pim_tf as tf_pim_ops
+
 
 NUM_CLASSES = 4096
 image_width = 224
@@ -238,6 +240,7 @@ def copy_weights(model,input):
 
 
 def alexnet_model_run(usr_args):
+    print("Running alexnet")
     global args 
     args = usr_args
 

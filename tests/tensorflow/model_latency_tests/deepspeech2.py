@@ -22,12 +22,11 @@ from six.moves import xrange    # pylint: disable=redefined-builtin
 import tensorflow as tf
 from tensorflow.keras import Input
 from tensorflow.keras import Model
-import tf_pim_ops
+import pim_tf as tf_pim_ops
 import timeit
 import argparse
 from tabulate import tabulate
 import os
-import tf_pim_ops as pim_ops
 
 SEED = 1234
 
@@ -370,7 +369,8 @@ class DeepSpeech2(tf.keras.Model):
                                                layer_id=layer_counter + 1, is_batch_norm=is_batch_norm,
                                                dtype=self.float_type, initializer=kernel_initializer))
 
-            self.lstm_pim = rnn_pim_layer(rnn_hidden_size=self.rnn_hidden_size,
+            if args.module == 'pim':
+                self.lstm_pim = rnn_pim_layer(rnn_hidden_size=self.rnn_hidden_size,
                                       num_layers = self.num_rnn_layers,
                                       is_batch_norm = True,
                                       is_bidirectional = True,

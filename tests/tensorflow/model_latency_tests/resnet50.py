@@ -38,8 +38,8 @@ import argparse
 import os
 from tabulate import tabulate
 
-import tf_pim_ops
-from tf_pim_ops.python.layers import pim_layers
+import pim_tf as tf_pim_ops
+import pim_tf.pim_layers as pim_layers
 
 SEED = 1235
 initializer = tf.keras.initializers.RandomNormal(seed=SEED)
@@ -484,4 +484,4 @@ def resnet_model_run(usr_args):
 
         print(tabulate(eval_time, headers=["Index", "Layer", "Time(ms)", "Input", "Output"], showindex="always", tablefmt='github'))
         args.profile = True
-        
+ 

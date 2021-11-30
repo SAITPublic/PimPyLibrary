@@ -1,6 +1,6 @@
 import argparse
 import tensorflow as tf
-import tf_pim_ops
+import pim_tf as tf_pim_ops
 import alexnet
 import gnmt
 import rnnt
@@ -59,4 +59,4 @@ if __name__ == '__main__':
         resnet50.resnet_model_run(args)
 
     tf_pim_ops.pim_deinit()
-    
+
