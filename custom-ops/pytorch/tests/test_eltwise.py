@@ -3,8 +3,8 @@ import torch
 import torch.nn as nn
 from torch.autograd import Function
 import pim_api
-from py_pim_ops.pim_eltwise import PimEltwiseFunction as pim_elt
-from py_pim_ops.pim_eltwise import PimEltwise
+from pim_pytorch.pim_eltwise import PimEltwiseFunction as pim_elt
+from pim_pytorch.pim_eltwise import PimEltwise
 
 
 class PyEltTest(unittest.TestCase):
@@ -23,7 +23,7 @@ class PyEltTest(unittest.TestCase):
             # print(result)
             #self.assertTrue(torch.allclose(pim_result, true_result, atol=0.01))
 
-    def _test_vec2(self):
+    def test_vec2(self):
         pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
         with torch.no_grad():
             gpu0 = torch.device(0)

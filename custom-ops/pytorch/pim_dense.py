@@ -16,8 +16,8 @@ class PimDenseFunction(Function):
 
         num_iters = 1
         num_batch = inputs.size()[0]
-        num_rows = weights.size()[1]
-        num_cols = weights.size()[0]
+        num_rows = weights.size()[0]
+        num_cols = weights.size()[1]
         #print(num_rows, num_cols)
 
         if inputs.ndim > 3:
