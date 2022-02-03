@@ -7,8 +7,8 @@ from pim_pytorch.pim_eltwise import PimEltwiseFunction as pim_elt
 from pim_pytorch.pim_eltwise import PimEltwise
 
 
-class PyEltTest(unittest.TestCase):
-    def test_vec(self):
+class PyEltAddTest(unittest.TestCase):
+    def test_add_func(self):
         pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
         with torch.no_grad():
             gpu0 = torch.device(0)
@@ -17,13 +17,12 @@ class PyEltTest(unittest.TestCase):
             add = torch.tensor([0], dtype=torch.int32, device=gpu0)
 
             pim_result = pim_elt.apply(input0, input1, add)
-            #true_result = input0 + input1
-            input0 + input1
+            true_result = input0 + input1
             # print(true_result)
             # print(result)
-            #self.assertTrue(torch.allclose(pim_result, true_result, atol=0.01))
+            self.assertTrue(torch.allclose(pim_result, true_result, atol=0.01))
 
-    def test_vec2(self):
+    def test_add_layer(self):
         pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
         with torch.no_grad():
             gpu0 = torch.device(0)
