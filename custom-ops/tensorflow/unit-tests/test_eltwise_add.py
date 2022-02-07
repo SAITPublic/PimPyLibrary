@@ -9,8 +9,8 @@ import pim_tf as tf_pim_ops
 
 tf.debugging.set_log_device_placement(True)
 
-class PimAddTestConstant(tf.test.TestCase):
-    def test_vector_vector(self):
+class PimAddTest(tf.test.TestCase):
+    def test_add_constant(self):
       with tf.device('/GPU:0'):
         input0 = tf.constant([1]*32, dtype=tf.float16)
         input1 = tf.constant([2]*32, dtype=tf.float16)
@@ -19,7 +19,19 @@ class PimAddTestConstant(tf.test.TestCase):
         with self.test_session():
             result = tf_pim_ops.pim_eltwise(input0, input1, add)
             self.assertAllEqual(result, [3]*32)
-            print(result)
+            #print(result)
+
+    def test_add_random(self):
+      with tf.device('/GPU:0'):
+        input0 = tf.random.uniform(shape=[1,1024], dtype=tf.float16)
+        input1 = tf.random.uniform(shape=[1,1024], dtype=tf.float16)
+        add = tf.constant([0], dtype=tf.int32)
+        result = None
+        with self.test_session():
+            result = tf_pim_ops.pim_eltwise(input0, input1, add)
+            golden = tf.add(input0,input1)
+            self.assertAllClose(result, golden,atol=0.01)
+            #print(result)
 
 if __name__ == '__main__':
     #pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
