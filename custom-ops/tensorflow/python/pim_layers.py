@@ -43,10 +43,15 @@ class PimDense(tf.keras.layers.Dense):
         return super(PimDense, self).compute_output_shape(input_shape)
 
     def get_config(self):
-        return super(PimDenseLayer, self).get_config()
+        return super(PimDense, self).get_config()
 
     def call(self, input):
-        return pim_dense(input, self.kernel, self.bias, self.has_bias)
+        use_pim_bias = tf.constant([0])
+        x = pim_dense(input, self.kernel, self.bias, use_pim_bias)
+        print('Kernel' , self.kernel)
+        if self.has_bias:
+           return x + self.bias
+        return x 
 
     def set_weights(self,weights):
         self.kernel = weights[0]
