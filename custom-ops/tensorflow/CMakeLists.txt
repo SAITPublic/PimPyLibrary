@@ -13,6 +13,9 @@ execute_process(COMMAND python3 -c
 set(CMAKE_CXX_COMPILER "${ROCM_PATH}/bin/hipcc")
 
 
+set(PIM_RELU_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/cc/kernels/pim_relu.cc
+            ${CMAKE_CURRENT_SOURCE_DIR}/cc/ops/pim_relu_ops.cc)
+
 set(PIM_ELT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/cc/kernels/pim_eltwise.cc
             ${CMAKE_CURRENT_SOURCE_DIR}/cc/ops/pim_eltwise_ops.cc)
 
@@ -28,9 +31,9 @@ set(PIM_DEINIT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/cc/kernels/pim_deinit.cc
 include_directories("${ROCM_PATH}/include")
 include_directories(/usr/local/lib/python3.6/dist-packages/tensorflow/include)
 link_directories("${ROCM_PATH}/hip/lib" "${ROCM_PATH}/hsa/lib" "${ROCM_PATH}/libhsakmt/lib" "${ROCM_PATH}/lib" "${PROJECT_SOURCE_DIR}/external_libs")
-add_library(pim_tf SHARED ${PIM_ELT_SOURCES} ${PIM_DENSE_SOURCES} ${PIM_INIT_SOURCES} ${PIM_DEINIT_SOURCES})
+add_library(pim_tf SHARED ${PIM_RELU_SOURCES} ${PIM_ELT_SOURCES} ${PIM_DENSE_SOURCES} ${PIM_INIT_SOURCES} ${PIM_DEINIT_SOURCES})
 target_link_libraries(pim_tf PimRuntime ${TF_LFLAGS})
 
-install ( TARGETS pim_tf LIBRARY DESTINATION  ${ROCM_PATH}/lib)
-install ( DIRECTORY python DESTINATION ${ROCM_PATH}/lib/tf_pim_ops )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py  DESTINATION ${ROCM_PATH}/lib/tf_pim_ops)
+#install ( TARGETS pim_tf LIBRARY DESTINATION  ${ROCM_PATH}/lib)
+#install ( DIRECTORY python DESTINATION ${ROCM_PATH}/lib/tf_pim_ops )
+#install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py  DESTINATION ${ROCM_PATH}/lib/tf_pim_ops)
