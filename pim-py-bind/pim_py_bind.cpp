@@ -77,10 +77,7 @@ PYBIND11_MODULE(pim_api, api_interface)
         .def_readwrite("n", &PimBShape::n);
 
     py::class_<PimBo>(api_interface, "PimBo", py::buffer_protocol()).def_buffer([](PimBo& bo) -> py::buffer_info {
-        py::capsule FreePimBo(bo.data, [](void* py_usr_ptr) {
-            PimBo* pimbo = reinterpret_cast<PimBo*>(py_usr_ptr);
-            PimDestroyBo(pimbo);
-        });
+        py::capsule FreePimBo(bo.data, [](void* py_usr_ptr) {});
 
         return py::buffer_info(
             bo.data,                                              /* Pointer to buffer */

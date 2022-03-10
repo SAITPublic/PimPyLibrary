@@ -5,8 +5,8 @@ import pim_api
 class TestEltMul(unittest.TestCase):
     def setUp(self):
         self.length = 128 * 1024
-        self.input1 = np.random.randn(self.length).astype(np.float16)
-        self.input2 = np.random.randn(self.length).astype(np.float16)
+        self.input1 = np.random.normal(0, 0.05, self.length).astype(np.float16)
+        self.input2 = np.random.normal(0, 0.05, self.length).astype(np.float16)
         self.golden = self.input1 * self.input2
         self.pim_out = np.zeros_like(self.golden, dtype=np.float16)
 
@@ -25,11 +25,10 @@ class TestEltMul(unittest.TestCase):
         pim_api.PimCopyMemory(pim_input2, host_input2, pim_api.HOST_TO_PIM)
 
         pim_api.PimExecuteMul(pim_output, pim_input1, pim_input2, None, 1)
+        pim_api.PimSynchronize(None)
         pim_api.PimCopyMemory(host_output, pim_output, pim_api.PIM_TO_HOST)
 
-        comparison = self.pim_out == self.golden
-        equal_arrays = comparison.all()
-
+        equal_arrays = np.allclose(self.golden, self.pim_out, atol=1e-3)
         self.assertEqual(equal_arrays, True, "All Valaues should be equal")
 
 ## To-Do : Failing due to alignment issue. 
@@ -50,9 +49,7 @@ class TestEltMul(unittest.TestCase):
         pim_api.PimExecuteMul(pim_output, pim_input1, pim_input2, None, 1)
         pim_api.PimCopyMemory(host_output, pim_output, pim_api.PIM_TO_HOST)
 
-        comparison = self.pim_out == self.golden
-        equal_arrays = comparison.all()
-
+        equal_arrays = np.allclose(self.golden, self.pim_out, atol=1e-3)
         self.assertEqual(equal_arrays, True, "All Valaues should be equal")
 
     def tearDown(self):
