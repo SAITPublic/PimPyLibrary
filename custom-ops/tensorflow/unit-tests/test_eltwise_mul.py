@@ -14,10 +14,10 @@ class PimMulTest(tf.test.TestCase):
       with tf.device('/GPU:0'):
         input0 = tf.constant([1]*32, dtype=tf.float16)
         input1 = tf.constant([2]*32, dtype=tf.float16)
-        add = tf.constant([1], dtype=tf.int32)
+        mul = tf.constant([1], dtype=tf.int32)
         result = None
         with self.test_session():
-            result = tf_pim_ops.pim_eltwise(input0, input1, add)
+            result = tf_pim_ops.pim_eltwise(input0, input1, mul)
             self.assertAllEqual(result, [2]*32)
             #print(result)
 
@@ -25,10 +25,10 @@ class PimMulTest(tf.test.TestCase):
       with tf.device('/GPU:0'):
         input0 = tf.random.uniform(shape=[1,1024], dtype=tf.float16)
         input1 = tf.random.uniform(shape=[1,1024], dtype=tf.float16)
-        add = tf.constant([1], dtype=tf.int32)
+        mul = tf.constant([1], dtype=tf.int32)
         result = None
         with self.test_session():
-            result = tf_pim_ops.pim_eltwise(input0, input1, add)
+            result = tf_pim_ops.pim_eltwise(input0, input1, mul)
             golden = tf.math.multiply(input0,input1)
             self.assertAllClose(result, golden,atol=0.01)
             #print(result)
