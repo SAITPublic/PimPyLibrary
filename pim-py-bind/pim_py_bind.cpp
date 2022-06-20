@@ -4,7 +4,7 @@
 #include "half.hpp"
 namespace py = pybind11;
 
-PimBo* PyWrapperPimCreateBoNCHW(int n, int c, int h, int w, PimPrecision prec, PimMemType mem, uintptr_t usr_ptr)
+PimBo* PyWrapperPimCreateBoNCHW(int w, int h, int c, int n, PimPrecision prec, PimMemType mem, uintptr_t usr_ptr)
 {
     void* user = (usr_ptr == 0) ? nullptr : (void*)usr_ptr;
     return PimCreateBo(w, h, c, n, prec, mem, user);
