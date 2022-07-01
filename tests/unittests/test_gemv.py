@@ -17,12 +17,12 @@ class TestGemv(unittest.TestCase):
         host_input = pim_api.PimCreateBo(self.input_len, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_HOST, input.__array_interface__['data'][0])
         host_weight = pim_api.PimCreateBo(self.input_len, self.output_len, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_HOST, self.weights.__array_interface__['data'][0])
         host_output = pim_api.PimCreateBo(self.output_len, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_HOST, pim_out.__array_interface__['data'][0])
-        pim_input = pim_api.PimCreateBo(self.input_len, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM,0)
-        pim_output = pim_api.PimCreateBo(self.output_len, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM,0)
+        pim_input = pim_api.PimCreateBo(self.input_len, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE,0)
+        pim_output = pim_api.PimCreateBo(self.output_len, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE,0)
 
-        pim_api.PimCopyMemory(pim_input, host_input, pim_api.HOST_TO_PIM)
+        pim_api.PimCopyMemory(pim_input, host_input, pim_api.HOST_TO_DEVICE)
         pim_api.PimExecuteGemv(pim_output, pim_input, host_weight, None, 1)
-        pim_api.PimCopyMemory(host_output, pim_output, pim_api.PIM_TO_HOST)
+        pim_api.PimCopyMemory(host_output, pim_output, pim_api.DEVICE_TO_HOST)
 
         self.assertEqual(np.allclose(golden, pim_out, rtol=0, atol=1e-01, equal_nan=False), True, "All Valaues should be equal")
 
@@ -36,12 +36,12 @@ class TestGemv(unittest.TestCase):
         host_weight = pim_api.PimCreateBo(self.input_len, self.output_len, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_HOST, self.weights.__array_interface__['data'][0])
         host_output = pim_api.PimCreateBo(self.output_len, 1, 1, batch_dim, pim_api.PIM_FP16, pim_api.MEM_TYPE_HOST, pim_out.__array_interface__['data'][0])
 
-        pim_input = pim_api.PimCreateBo(self.input_len, 1, 1, batch_dim, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM,0)
-        pim_output = pim_api.PimCreateBo(self.output_len, 1, 1, batch_dim, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM,0)
+        pim_input = pim_api.PimCreateBo(self.input_len, 1, 1, batch_dim, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE,0)
+        pim_output = pim_api.PimCreateBo(self.output_len, 1, 1, batch_dim, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE,0)
 
-        pim_api.PimCopyMemory(pim_input, host_input, pim_api.HOST_TO_PIM)
+        pim_api.PimCopyMemory(pim_input, host_input, pim_api.HOST_TO_DEVICE)
         pim_api.PimExecuteGemv(pim_output, pim_input, host_weight, None, 1)
-        pim_api.PimCopyMemory(host_output, pim_output, pim_api.PIM_TO_HOST)
+        pim_api.PimCopyMemory(host_output, pim_output, pim_api.DEVICE_TO_HOST)
 
         self.assertEqual(np.allclose(golden, pim_out, rtol=0, atol=1e-01, equal_nan=False), True, "All Valaues should be equal")
 
