@@ -120,5 +120,6 @@ PYBIND11_MODULE(pim_api, api_interface)
     api_interface.def("PimExecuteGemv", static_cast<int (*)(PimBo*, PimBo*, PimBo*, void*, bool)>(&PimExecuteGemv));
     api_interface.def("PimExecuteGemvAdd",
                       static_cast<int (*)(PimBo*, PimBo*, PimBo*, void*, bool)>(&PimExecuteGemvAdd));
+    api_interface.def("PimSetDevice", static_cast<int (*)(unsigned int)>(&PimSetDevice));
     api_interface.def("PimSynchronize", &PimSynchronize);
 }
