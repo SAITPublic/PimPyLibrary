@@ -77,5 +77,3 @@ if __name__ == "__main__":
     torch.manual_seed(2)
     unittest.main()
 
-testDense(1)
-testDense2(1)
