@@ -1,45 +1,45 @@
 # PimPyLibrary
 
-This repository provides an python interface for PIMLibrary
+This repository provides an python interface for PIMLibrary.
 ## Download submodule
-use submodule update for pybind11 submodule once for downloading it.
+Use submodule update for pybind11 submodule once for downloading it.
 ```
 git submodule update --init
 ```
-## How to Build and Install
-Below command builds PimPyLibrary interface and installs python package
+## How to build and install PIM custom ops
+The command below is how to build the PimPyLibrary interface and install the python package.
+### Install PimPyLibrary interface
 ```
 export ROCM_PATH=<path to rocm installation>
 pip3 install --trusted-host 'pypi.org' ./PimPyLibrary
 ```
 
-## Tests
-`tests` folder contains python test scripts for testing python bindings
-### example
-For all tests
-`python3 -m unittest unittests/test_*`
-
-For Individual tests
-`python3 -m unittest unittests/test_elt_add.py`
-
-
-## Custom ops
-Custom ops are supported for pytorch and tensorflow
-### Pytorch custom ops
-To install
-```
-pip3 install --trusted-host 'pypi.org' ./PimPyLibrary/custom-ops/pytorch
-```
-To run tests in pytorch/unit-tests
-```
-python3 ./PimPyLibrary/custom-ops/pytorch/unit-tests/test_eltwise_add.py 
-```
-
-### Tensorflow custom ops
-To install
+### Install Tensorflow custom ops
 ```
 pip3 install --trusted-host 'pypi.org' ./PimPyLibrary/custom-ops/tensorflow -v
 ```
-To run tests in tensorflow/unit-tests
+
+### Install Pytroch custom ops
 ```
-python3 ./PimPyLibrary/custom-ops/tensorflow/unit-tests/test_eltwise_add.py
+pip3 install --trusted-host 'pypi.org' ./PimPyLibrary/custom-ops/pytorch
+```
+
+## How to test PIM custom ops
+PIM custom ops can be run with numpy and pytorch and tensorflow.
+### numpy examples
+To run all numpy tests
+```
+python3 -m unittest ./PimPyLibrary/examples/numpy/test_*.py
+```
+
+### Pytorch examples 
+To run all Pytorch tests
+```
+python3 -m unittest ./PimPyLibrary/examples/pytorch/test_*.py 
+```
+
+### Tensorflow examples
+To run all Tensorflow tests
+```
+python3 -m unittest ./PimPyLibrary/examples/tensorflow/test_*.py
+```
