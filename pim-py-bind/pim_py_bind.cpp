@@ -1,5 +1,6 @@
 #include <pim_runtime_api.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
 #include <iostream>
 #include "half.hpp"
 namespace py = pybind11;
@@ -100,11 +101,13 @@ PYBIND11_MODULE(pim_api, api_interface)
     api_interface.def("PimInitialize", &PimInitialize, "For initialization of pim data",
                       py::arg("rt_type") = RT_TYPE_HIP, py::arg("PimPrecision") = PIM_FP16);
     api_interface.def("PimDeinitialize", &PimDeinitialize, "For de initialization of pim data");
-    api_interface.def("PimCreateBo", &PyWrapperPimCreateBoNCHW, "For Creating PimBo memory object using nchw values");
-    api_interface.def("PimCreateBo", &PyWrapperPimCreateBoDesc, "For Creating PimBo memory object", py::arg("desc"),
+    api_interface.def("PimCreateBo", &PyWrapperPimCreateBoNCHW,
+		      py::return_value_policy::reference, "For Creating PimBo memory object using nchw values");
+    api_interface.def("PimCreateBo", &PyWrapperPimCreateBoDesc,
+                      py::return_value_policy::reference, "For Creating PimBo memory object", py::arg("desc"),
                       py::arg("mem"), py::arg("mflag") = ELT_OP, py::arg("usr_ptr") = 0);
-    api_interface.def("PimDestroyBo", &PimDestroyBo);
-    api_interface.def("PimCreateDesc", &PimCreateDesc);
+    api_interface.def("PimDestroyBo", static_cast<int (*)(PimBo*)>(&PimDestroyBo));
+    api_interface.def("PimCreateDesc", &PimCreateDesc,  py::return_value_policy::reference);
     api_interface.def("PimDestroyDesc", &PimDestroyDesc);
     api_interface.def("PimAllocMemory", &PyWrapperPimAllocMemory);
     api_interface.def("PimAllocMemory", static_cast<int (*)(PimBo*)>(&PimAllocMemory));
@@ -120,6 +123,15 @@ PYBIND11_MODULE(pim_api, api_interface)
     api_interface.def("PimExecuteGemv", static_cast<int (*)(PimBo*, PimBo*, PimBo*, void*, bool)>(&PimExecuteGemv));
     api_interface.def("PimExecuteGemvAdd",
                       static_cast<int (*)(PimBo*, PimBo*, PimBo*, void*, bool)>(&PimExecuteGemvAdd));
+    api_interface.def("PimExecuteGemvAdd",
+                      static_cast<int (*)(PimBo*, PimBo*, PimBo*, PimBo*, bool ,void*, bool)>(&PimExecuteGemvAdd));
+    api_interface.def("PimExecuteGemvList",
+		      static_cast<int (*)(PimBo*, PimBo*, PimBo*, void*, bool)>(&PimExecuteGemvList));
     api_interface.def("PimSetDevice", static_cast<int (*)(unsigned int)>(&PimSetDevice));
+    api_interface.def("PimGetDevice", [](py::array_t<unsigned int> buffer){
+                      py::buffer_info info = buffer.request();
+                      PimGetDevice(static_cast<unsigned int *>(info.ptr));});
     api_interface.def("PimSynchronize", &PimSynchronize);
+    api_interface.def("PimExecuteDummy", &PimExecuteDummy);
+    api_interface.def("createStream", static_cast<void* (*)(PimRuntimeType)>(&createStream));
 }

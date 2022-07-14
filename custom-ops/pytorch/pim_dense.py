@@ -50,11 +50,16 @@ class PimDenseFunction(Function):
             pim_api.PimExecuteGemv(dev_out, dev_in, dev_weight, None, 0)
             offset_row += (num_rows * num_batch)*2  # sizeof(half)
             offset_col += (num_cols * num_batch)*2
+            pim_api.PimDestroyBo(dev_in)
+            pim_api.PimDestroyBo(dev_out)
 
         if bias is not None:
             # print(bias.shape)
             # print(out_tensor.shape)
             out_tensor = torch.add(bias, out_tensor)
+
+        pim_api.PimDestroyBo(dev_weight)
+        pim_api.PimDestroyDesc(pim_desc)
         return out_tensor
 
     @staticmethod

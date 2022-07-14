@@ -43,6 +43,12 @@ class PimEltwiseFunction(Function):
             pim_api.PimExecuteMul(pim_output, pim_input1, pim_input2, None, 1)
 
         pim_api.PimCopyMemory(dev_output, pim_output, pim_api.PIM_TO_DEVICE)
+        pim_api.PimDestroyBo(dev_input1)
+        pim_api.PimDestroyBo(dev_input2)
+        pim_api.PimDestroyBo(dev_output)
+        pim_api.PimDestroyBo(pim_input1)
+        pim_api.PimDestroyBo(pim_input2)
+        pim_api.PimDestroyBo(pim_output)
         return out_tensor
 
     @staticmethod

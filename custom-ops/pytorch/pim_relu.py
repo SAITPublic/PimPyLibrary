@@ -27,6 +27,12 @@ class PimReluFunction(Function):
         pim_api.PimExecuteRelu(pim_output, pim_input, None, 1)
         pim_api.PimCopyMemory(dev_output, pim_output, pim_api.PIM_TO_DEVICE)
 
+
+        pim_api.PimDestroyBo(dev_input)
+        pim_api.PimDestroyBo(dev_output)
+        pim_api.PimDestroyBo(pim_input)
+        pim_api.PimDestroyBo(pim_output)
+
         return out_tensor
 
     @staticmethod
