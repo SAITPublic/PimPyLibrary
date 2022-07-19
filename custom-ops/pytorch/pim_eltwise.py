@@ -21,18 +21,18 @@ class PimEltwiseFunction(Function):
             input1.size(), dtype=torch.float16, device=input1.device)
 
         dev_input1 = pim_api.PimCreateBo(
-            length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, input1.data_ptr())
+            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, input1.data_ptr())
         dev_input2 = pim_api.PimCreateBo(
-            length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, input2.data_ptr())
+            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, input2.data_ptr())
         dev_output = pim_api.PimCreateBo(
-            length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, out_tensor.data_ptr())
+            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, out_tensor.data_ptr())
 
         pim_input1 = pim_api.PimCreateBo(
-            length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0)
+            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0)
         pim_input2 = pim_api.PimCreateBo(
-            length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0)
+            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0)
         pim_output = pim_api.PimCreateBo(
-            length, 1, 1, 1, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0)
+            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0)
 
         pim_api.PimCopyMemory(pim_input1, dev_input1, pim_api.DEVICE_TO_PIM)
         pim_api.PimCopyMemory(pim_input2, dev_input2, pim_api.DEVICE_TO_PIM)

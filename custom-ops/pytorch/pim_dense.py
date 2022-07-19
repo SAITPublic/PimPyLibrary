@@ -6,19 +6,13 @@ import pim_api
 
 class PimDenseFunction(Function):
     @staticmethod
-    def forward(ctx, inputs, orig_weights, bias):
-
-        #weights_t = orig_weights.clone().detach()
-        #weights_t = torch.transpose(weights_t, 0, 1).contiguous()
-        #weights = weights_t
-        weights = orig_weights
-
+    def forward(ctx, inputs, weights, bias):
 
         num_iters = 1
         num_batch = inputs.size()[0]
-        num_rows = weights.size()[0]
-        num_cols = weights.size()[1]
-        #print(num_rows, num_cols)
+        num_rows = weights.size()[1]
+        num_cols = weights.size()[0]
+        print(num_rows, num_cols)
 
         if inputs.ndim > 3:
             print("More than 3 dimensional input not supported in PimDense")
@@ -27,10 +21,10 @@ class PimDenseFunction(Function):
         if inputs.ndim == 3:
             num_iters = inputs.size()[1]
             out_tensor = torch.zeros(
-                (num_batch, num_iters, num_rows), dtype=torch.float16, device=inputs.device)
+                (num_batch, num_iters, num_cols), dtype=torch.float16, device=inputs.device)
         else:
             out_tensor = torch.zeros(
-                (num_batch, num_rows), dtype=torch.float16, device=inputs.device)
+                (num_batch, num_cols), dtype=torch.float16, device=inputs.device)
 
         in_len = torch.numel(inputs)
         out_len = torch.numel(out_tensor)

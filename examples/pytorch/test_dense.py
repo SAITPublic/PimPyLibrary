@@ -13,8 +13,8 @@ class PyDenseTest(unittest.TestCase):
   def testDense(self):
     pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
     n_batch = 2
-    in_size = 1024
-    out_size = 1024
+    in_size = 256
+    out_size = 4096
     device = torch.device('cuda')
 
     input = torch.rand(size=(n_batch, in_size), dtype=torch.float16)
@@ -34,18 +34,18 @@ class PyDenseTest(unittest.TestCase):
     bias = None
     pim_result = pim_dense.apply(input, weights, bias)  # Obtain PIM output
 
-    #print("Pytorch Result:", pytorch_result)
-    #print("PIM Result:", pim_result)
-    #print("Weights:", weights)
+    print("Pytorch Result:", pytorch_result)
+    print("PIM Result:", pim_result)
+    print("Weights:", weights)
     self.assertTrue(torch.allclose(pim_result, pytorch_result, atol=0.01))
 
 
   def testDense2(self):
     pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
     in_batch = 2
-    in_iters = 1
+    in_iters = 2
     in_size = 256
-    out_size = 1024
+    out_size = 4096
 
     with torch.no_grad():
         device = torch.device('cuda')
