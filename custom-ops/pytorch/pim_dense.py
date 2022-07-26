@@ -12,7 +12,6 @@ class PimDenseFunction(Function):
         num_batch = inputs.size()[0]
         num_rows = weights.size()[1]
         num_cols = weights.size()[0]
-        print(num_rows, num_cols)
 
         if inputs.ndim > 3:
             print("More than 3 dimensional input not supported in PimDense")
