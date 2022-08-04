@@ -5,10 +5,10 @@
 #include "half.hpp"
 namespace py = pybind11;
 
-PimBo* PyWrapperPimCreateBoNCHW(int w, int h, int c, int n, PimPrecision prec, PimMemType mem, uintptr_t usr_ptr)
+PimBo* PyWrapperPimCreateBoNCHW(int n, int c, int h, int w, PimPrecision prec, PimMemType mem, uintptr_t usr_ptr)
 {
     void* user = (usr_ptr == 0) ? nullptr : (void*)usr_ptr;
-    return PimCreateBo(w, h, c, n, prec, mem, user);
+    return PimCreateBo(n, c, h, w, prec, mem, user);
 }
 
 PimBo* PyWrapperPimCreateBoDesc(PimDesc* desc, PimMemType mem, PimMemFlag mflag, uintptr_t usr_ptr)
@@ -88,10 +88,10 @@ PYBIND11_MODULE(pim_api, api_interface)
 
     py::class_<PimBShape>(api_interface, "PimBShape")
         .def(py::init<>())
-        .def_readwrite("w", &PimBShape::w)
-        .def_readwrite("h", &PimBShape::h)
+        .def_readwrite("n", &PimBShape::n)
         .def_readwrite("c", &PimBShape::c)
-        .def_readwrite("n", &PimBShape::n);
+        .def_readwrite("h", &PimBShape::h)
+        .def_readwrite("w", &PimBShape::w);
 
     py::class_<PimBo>(api_interface, "PimBo", py::buffer_protocol()).def_buffer([](PimBo& bo) -> py::buffer_info {
         py::capsule FreePimBo(bo.data, [](void* py_usr_ptr) {});
@@ -161,7 +161,7 @@ PYBIND11_MODULE(pim_api, api_interface)
     api_interface.def("PimExecuteGemvList",
 		      static_cast<int (*)(PimBo*, PimBo*, PimBo*, void*, bool)>(&PimExecuteGemvList));
     api_interface.def("PimExecuteGemm",
-		      static_cast<int (*)(PimBo*, PimBo*, PimBo*, PimBo*, PimActFunc, void*, bool)>(&PimExecuteGemm));
+		      static_cast<int (*)(PimBo*, PimBo*, PimBo*, PimBo*, PimActFunc, bool, void*, bool)>(&PimExecuteGemm));
     api_interface.def("PimSetDevice", static_cast<int (*)(unsigned int)>(&PimSetDevice));
     api_interface.def("PimGetDevice", [](py::array_t<unsigned int> buffer){
                       py::buffer_info info = buffer.request();

@@ -6,7 +6,7 @@ import pim_api
 
 class PimGemmFunction(Function):
     @staticmethod
-    def forward(ctx, inputs, weights, bias, act, block, transposed):
+    def forward(ctx, inputs, weights, bias, act, transpose, block):
 
         if inputs.ndim > 3:
             print("More than 3 dimensional input not supported in Gemm")
@@ -16,12 +16,8 @@ class PimGemmFunction(Function):
         num_channels = inputs.size()[0]
         inout_h  = inputs.size()[1]
 
-        if transposed == False:
-            in_w = weights.size()[1]
-            out_w = weights.size()[2]
-        else:
-            in_w = weights.size()[2]
-            out_w = weights.size()[1]
+        in_w = weights.size()[1]
+        out_w = weights.size()[2]
 
         out_tensor = torch.empty(
                 (num_channels, inout_h, out_w), dtype=torch.float16, device=inputs.device)
@@ -33,7 +29,7 @@ class PimGemmFunction(Function):
         device_weight = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_WEIGHT, weights.data_ptr())
         device_bias = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_BIAS, bias.data_ptr())
         device_output = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_OUTPUT, out_tensor.data_ptr())
-        pim_api.PimExecuteGemm(device_output, device_input, device_weight, device_bias, act, None, block)
+        pim_api.PimExecuteGemm(device_output, device_input, device_weight, device_bias, act, transpose, None, block)
         if (block == False):
             pim_api.PimSynchronize(None)
 
@@ -60,5 +56,5 @@ class PimGemm(nn.Module):
     def __repr__(self):
         return "PIM Gemm layer"
 
-    def forward(self, inputs, weight, bias, act):
-        return PimPimGemmFunction.apply(inputs, weight, bias, act, block=True, transposed=False)
+    def forward(self, inputs, weight, bias, act, transpose, block):
+        return PimPimGemmFunction.apply(inputs, weight, bias, act, transpose, block)

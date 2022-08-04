@@ -20,8 +20,7 @@ class PyGemmTest(unittest.TestCase):
                     weight[c][i][j] = i
         return weight
 
-
-    def config_test(self, n_channels, inout_h, in_w, out_w, bias, transpose=False):
+    def config_test(self, n_channels, inout_h, in_w, out_w, transpose, block):
 
       with torch.no_grad():
 
@@ -50,12 +49,12 @@ class PyGemmTest(unittest.TestCase):
         input = sc * input - sc/2.0
         weights = sc * weights - sc/2.0
         weights = self.get_weight(weights,0,0)
-        _weights = weights.clone()
+        #_weights = weights.clone()
         #if transpose == True:
-        _weights = _weights.permute(0,2,1).contiguous()
+        #_weights = _weights.permute(0,2,1).contiguous()
 
         assert(input.is_contiguous())
-        assert(_weights.is_contiguous())
+        #assert(_weights.is_contiguous())
         assert(bias.is_contiguous())
         output = bias.clone()
         for i in range(n_channels):
@@ -63,7 +62,7 @@ class PyGemmTest(unittest.TestCase):
         output = relu(output)
 
 
-        pim_result = pim_gemm.apply(input, _weights, bias, pim_api.ACT_RELU,True)
+        pim_result = pim_gemm.apply(input, weights, bias, pim_api.ACT_RELU, transpose, block)
         #print((pim_result != 0.0).nonzero(as_tuple=False))
         print(output.shape)
         print(pim_result.shape)
@@ -83,27 +82,27 @@ class PyGemmTest(unittest.TestCase):
         inout_h = 1
         in_w = 1024
         out_w = 4096
-        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True)
+        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True, True)
         self.assertTrue(torch.allclose(pim_result, pytorch_result, atol=0.1))
         pim_api.PimDeinitialize()
 
-    def _testGemm_1x8x1024_1024x4096(self):
+    def testGemm_1x8x1024_1024x4096(self):
         pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
         n_channels = 1
         inout_h = 8
         in_w = 1024
         out_w = 4096
-        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True)
+        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True, True)
         self.assertTrue(torch.allclose(pim_result, pytorch_result, atol=0.1))
         pim_api.PimDeinitialize()
 
-    def _testGemm_4x8x1024_1024x4096(self):
+    def testGemm_4x8x1024_1024x4096(self):
         pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
         n_channels = 4
         inout_h = 8
         in_w = 1024
         out_w = 4096
-        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True)
+        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True, True)
         self.assertTrue(torch.allclose(pim_result, pytorch_result, atol=0.1))
         pim_api.PimDeinitialize()
 
@@ -113,37 +112,37 @@ class PyGemmTest(unittest.TestCase):
         inout_h = 8
         in_w = 4096
         out_w = 1024
-        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True)
+        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True, True)
         self.assertTrue(torch.allclose(pim_result, pytorch_result, atol=2.5))
         pim_api.PimDeinitialize()
 
-    def i_testGemm_4x1x4096_1024(self):
+    def testGemm_4x1x4096_1024(self):
         pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
         n_channels = 4
         inout_h = 1
         in_w = 4096
         out_w = 1024
-        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True)
+        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True, True)
         self.assertTrue(torch.allclose(pim_result, pytorch_result, atol=.1))
         pim_api.PimDeinitialize()
 
-    def _testGemm_64x1x256x64_256x64(self):
+    def testGemm_64x1x256x64_256x64(self):
         pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
         n_channels = 64
         inout_h = 1
         in_w = 256
         out_w = 64
-        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True)
+        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True, True)
         self.assertTrue(torch.allclose(pim_result, pytorch_result, atol=0.1))
         pim_api.PimDeinitialize()
 
-    def _testGemm_64x1x1024x64_1024x64(self):
+    def testGemm_64x1x1024x64_1024x64(self):
         pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
         n_channels = 64
         inout_h = 1
         in_w = 1024
         out_w = 64
-        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True)
+        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True, True)
         self.assertTrue(torch.allclose(pim_result, pytorch_result, atol=0.1))
         pim_api.PimDeinitialize()
 
