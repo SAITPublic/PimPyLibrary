@@ -3,6 +3,7 @@
 #include <pybind11/numpy.h>
 #include <iostream>
 #include "half.hpp"
+
 namespace py = pybind11;
 
 PimBo* PyWrapperPimCreateBoNCHW(int n, int c, int h, int w, PimPrecision prec, PimMemType mem, uintptr_t usr_ptr)
@@ -95,16 +96,18 @@ PYBIND11_MODULE(pim_api, api_interface)
 
     py::class_<PimBo>(api_interface, "PimBo", py::buffer_protocol()).def_buffer([](PimBo& bo) -> py::buffer_info {
         py::capsule FreePimBo(bo.data, [](void* py_usr_ptr) {});
-
         return py::buffer_info(
-            bo.data,                                              /* Pointer to buffer */
-            sizeof(half_float::half),                             /* Size of one scalar */
-            "e",                                                  /* Python struct-style format descriptor */
-            4,                                                    /* Number of dimensions */
-            {bo.bshape.n, bo.bshape.c, bo.bshape.h, bo.bshape.w}, /* Buffer dimensions */
-            {sizeof(half_float::half) * bo.bshape.c * bo.bshape.h * bo.bshape.w, /* Strides (in bytes) for each index */
-             sizeof(half_float::half) * bo.bshape.h * bo.bshape.w, sizeof(half_float::half) * bo.bshape.w,
-             sizeof(half_float::half)});
+            bo.data,                                                              /* Pointer to buffer */
+            sizeof(half_float::half),                                             /* Size of one scalar */
+            "e",                                                                  /* Python struct-style format descriptor */
+            4,                                                                    /* Number of dimensions */
+            { bo.bshape.n, bo.bshape.c, bo.bshape.h, bo.bshape.w },               /* Buffer dimensions */
+            {
+              sizeof(half_float::half) * bo.bshape.c * bo.bshape.h * bo.bshape.w, /* Strides (in bytes) for each index */
+              sizeof(half_float::half) * bo.bshape.h * bo.bshape.w,
+              sizeof(half_float::half) * bo.bshape.w,
+              sizeof(half_float::half)
+            });
     });
 
     py::class_<PimDesc>(api_interface, "PimDesc")
@@ -138,8 +141,8 @@ PYBIND11_MODULE(pim_api, api_interface)
                       py::return_value_policy::reference, "For Creating PimBo memory object", py::arg("desc"),
                       py::arg("mem"), py::arg("mflag"), py::arg("usr_ptr") = 0);
     api_interface.def("PimDestroyBo", static_cast<int (*)(PimBo*)>(&PimDestroyBo));
-    api_interface.def("PimCreateDesc", &PimCreateDesc,  py::return_value_policy::reference);
-    api_interface.def("PimCreateGemmDesc", &PimCreateGemmDesc,  py::return_value_policy::reference);
+    api_interface.def("PimCreateDesc", &PimCreateDesc, py::return_value_policy::reference);
+    api_interface.def("PimCreateGemmDesc", &PimCreateGemmDesc, py::return_value_policy::reference);
     api_interface.def("PimDestroyDesc", &PimDestroyDesc);
     api_interface.def("PimDestroyGemmDesc", &PimDestroyGemmDesc);
     api_interface.def("PimAllocMemory", &PyWrapperPimAllocMemory);
