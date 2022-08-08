@@ -164,7 +164,7 @@ PYBIND11_MODULE(pim_api, api_interface)
     api_interface.def("PimExecuteGemvList",
 		      static_cast<int (*)(PimBo*, PimBo*, PimBo*, void*, bool)>(&PimExecuteGemvList));
     api_interface.def("PimExecuteGemm",
-		      static_cast<int (*)(PimBo*, PimBo*, PimBo*, PimBo*, PimActFunc, bool, void*, bool)>(&PimExecuteGemm));
+		      static_cast<int (*)(PimBo*, PimBo*, PimBo*, PimBo*, PimActFunc, void*, bool)>(&PimExecuteGemm));
     api_interface.def("PimSetDevice", static_cast<int (*)(unsigned int)>(&PimSetDevice));
     api_interface.def("PimGetDevice", [](py::array_t<unsigned int> buffer){
                       py::buffer_info info = buffer.request();
