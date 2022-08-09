@@ -8,15 +8,31 @@ class PimFusedFFNFunction(Function):
     @staticmethod
     def forward(ctx, inputs, fc1_w, fc1_bias, fc2_w, fc2_bias, block):
 
+
+        input_dims = inputs.ndim
+        if inputs.ndim not in [3,4]:
+            print("Input dimension not supported in Gemm")
+            return
+
+        if fc1_w.ndim not in [2,3] or fc2_w.ndim not in [2,3]:
+            print("Only 2D and 3D weights supported")
+            return
+
+        if fc1_w.ndim == 2:
+             fc1_w = torch.unsqueeze(fc1_w,0)
+        if fc2_w.ndim == 2:
+             fc2_w = torch.unsqueeze(fc2_w,0)
+        if inputs.ndim == 3:
+             inputs = torch.unsqueeze(inputs,0)
+
         #--first ffn-------------
-        num_batch = 1
-        num_channels = inputs.size()[0]
-        inout_h  = inputs.size()[1]
         in_w = fc1_w.size()[1]
         out_w = fc1_w.size()[2]
+        num_batch = inputs.size()[0]
+        num_channels = inputs.size()[1]
+        inout_h = inputs.size()[2]
         out_tensor = torch.empty(
-                (num_channels, inout_h,  out_w), dtype=torch.float16, device=inputs.device)
-
+                (num_batch, num_channels, inout_h, out_w), dtype=torch.float16, device=inputs.device)
 
         pim_gemm_desc = pim_api.PimCreateGemmDesc(num_batch, num_channels, inout_h, in_w, out_w, pim_api.PIM_FP16)
         device_input = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_INPUT, inputs.data_ptr())
@@ -34,12 +50,15 @@ class PimFusedFFNFunction(Function):
         pim_api.PimDestroyGemmDesc(pim_gemm_desc)
 
         #--second ffn-------------
-        num_channels = out_tensor.size()[0]
+        num_channels = out_tensor.size()[1]
         in_w = fc2_w.size()[1]
         out_w = fc2_w.size()[2]
-        o2 = torch.empty(
-                (num_channels, inout_h,  out_w), dtype=torch.float16, device=inputs.device)
-
+        if input_dims == 4:
+            o2 = torch.empty(
+                (num_batch, num_channels, inout_h, out_w), dtype=torch.float16, device=inputs.device)
+        else:
+            o2 = torch.empty(
+                (num_channels, inout_h, out_w), dtype=torch.float16, device=inputs.device)
 
         pim_gemm_desc = pim_api.PimCreateGemmDesc(num_batch, num_channels, inout_h, in_w, out_w, pim_api.PIM_FP16);
         device_input = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_INPUT, out_tensor.data_ptr());

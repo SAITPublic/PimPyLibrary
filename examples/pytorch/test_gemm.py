@@ -18,7 +18,7 @@ class PyGemmTest(unittest.TestCase):
                     weight[c][i][j] = i
         return weight
 
-    def config_test(self, n_channels, inout_h, in_w, out_w, block):
+    def config_test(self, n_channels, inout_h, in_w, out_w, block, make_input_4D=False):
 
       with torch.no_grad():
         device = torch.device('cuda')
@@ -29,6 +29,10 @@ class PyGemmTest(unittest.TestCase):
                              dtype=torch.float16, device=device)
         bias = torch.rand(size=(n_channels, inout_h, out_w),
                           dtype=torch.float16, device=device)
+
+        if make_input_4D == True:
+            input = torch.unsqueeze(input,0)
+            bias = torch.unsqueeze(bias,0)
 
         #scale and uniform[ -1 to 1 ]
         sc = 2.0
@@ -42,6 +46,16 @@ class PyGemmTest(unittest.TestCase):
         output = relu(output)
         pim_result = pim_gemm.apply(input, weights, bias, pim_api.ACT_RELU, block)
         return pim_result, output
+
+    def testGemm_1x1024_1024x4096_4Dinput(self):
+        pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
+        n_channels = 1
+        inout_h = 1
+        in_w = 1024
+        out_w = 4096
+        pim_result, pytorch_result = self.config_test(n_channels, inout_h, in_w, out_w, True, True)
+        self.assertTrue(torch.allclose(pim_result, pytorch_result, atol=0.1))
+        pim_api.PimDeinitialize()
 
     def testGemm_1x1024_1024x4096(self):
         pim_api.PimInitialize(pim_api.RT_TYPE_HIP, pim_api.PIM_FP16)
