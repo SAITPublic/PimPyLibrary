@@ -12,8 +12,8 @@ class PimFusedFFNFunction(Function):
         num_batch = 1
         num_channels = inputs.size()[0]
         inout_h  = inputs.size()[1]
-        in_w = fc1_w.size()[2]
-        out_w = fc1_w.size()[1]
+        in_w = fc1_w.size()[1]
+        out_w = fc1_w.size()[2]
         out_tensor = torch.empty(
                 (num_channels, inout_h,  out_w), dtype=torch.float16, device=inputs.device)
 
@@ -35,8 +35,8 @@ class PimFusedFFNFunction(Function):
 
         #--second ffn-------------
         num_channels = out_tensor.size()[0]
-        in_w = fc2_w.size()[2]
-        out_w = fc2_w.size()[1]
+        in_w = fc2_w.size()[1]
+        out_w = fc2_w.size()[2]
         o2 = torch.empty(
                 (num_channels, inout_h,  out_w), dtype=torch.float16, device=inputs.device)
 
