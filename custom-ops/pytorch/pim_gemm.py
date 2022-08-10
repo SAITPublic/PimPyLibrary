@@ -7,35 +7,25 @@ class PimGemmFunction(Function):
     @staticmethod
     def forward(ctx, inputs, weights, bias, act, block):
 
-        input_dims = inputs.ndim
-        if inputs.ndim not in [3,4]:
+        if inputs.ndim not in [4]:
             print("Input dimension not supported in Gemm")
             return
 
-        if weights.ndim not in [2,3]:
-            print("Only 2D and 3D weights supported")
+        if weights.ndim not in [4]:
+            print("Weight dimension not supported in Gemm")
             return
 
-        if weights.ndim == 2:
-             weights = torch.unsqueeze(weights,0)
-        if inputs.ndim == 3:
-             inputs = torch.unsqueeze(inputs,0)
-
-        in_w = weights.size()[1]
-        out_w = weights.size()[2]
-        num_batch = inputs.size()[0]
-        num_channels = inputs.size()[1]
+        batch = inputs.size()[0]
+        channel = inputs.size()[1]
         inout_h = inputs.size()[2]
+        in_w = inputs.size()[3]
+        out_w = weights.size()[3]
 
-        if input_dims == 4:
-            out_tensor = torch.empty(
-                (num_batch, num_channels, inout_h, out_w), dtype=torch.float16, device=inputs.device)
-        else:
-            out_tensor = torch.empty(
-                (num_channels, inout_h, out_w), dtype=torch.float16, device=inputs.device)
+        out_tensor = torch.empty(
+            (batch, channel, inout_h, out_w), dtype=torch.float16, device=inputs.device)
 
-        #print('Custom op pimgemm descriptor (n, c, inout_h, in_w, out_w)', num_batch, num_channels, inout_h, in_w, out_w)
-        pim_gemm_desc = pim_api.PimCreateGemmDesc(num_batch, num_channels, inout_h, in_w, out_w, pim_api.PIM_FP16)
+        #print('Custom op pimgemm descriptor (n, c, inout_h, in_w, out_w)', batch, channel, inout_h, in_w, out_w)
+        pim_gemm_desc = pim_api.PimCreateGemmDesc(batch, channel, inout_h, in_w, out_w, pim_api.PIM_FP16)
         device_input = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_INPUT, inputs.data_ptr())
         device_weight = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_WEIGHT, weights.data_ptr())
         device_bias = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_BIAS, bias.data_ptr())
