@@ -40,7 +40,7 @@ class PyGemmTest(unittest.TestCase):
         output = torch.matmul(input, weight)
         output += bias
         output = relu(output)
-        pim_result = pim_gemm.apply(input, weight, bias, pim_api.ACT_RELU, block)
+        pim_result = pim_gemm.apply(input, weight, bias, pim_api.ACT_RELU, pim_api.I_X_W, block)
         return pim_result, output
 
     def testGemm_2x1x1x1024_2x1x1024x4096(self):

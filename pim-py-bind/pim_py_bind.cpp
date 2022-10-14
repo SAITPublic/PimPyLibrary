@@ -6,22 +6,22 @@
 
 namespace py = pybind11;
 
-PimBo* PyWrapperPimCreateBoNCHW(int n, int c, int h, int w, PimPrecision prec, PimMemType mem, uintptr_t usr_ptr)
+PimBo* PyWrapperPimCreateBoNCHW(int n, int c, int h, int w, PimPrecision prec, PimMemType mem, uintptr_t usr_ptr, bool transposed)
 {
     void* user = (usr_ptr == 0) ? nullptr : (void*)usr_ptr;
-    return PimCreateBo(n, c, h, w, prec, mem, user);
+    return PimCreateBo(n, c, h, w, prec, mem, user, transposed);
 }
 
-PimBo* PyWrapperPimCreateBoDesc(PimDesc* desc, PimMemType mem, PimMemFlag mflag, uintptr_t usr_ptr)
+PimBo* PyWrapperPimCreateBoDesc(PimDesc* desc, PimMemType mem, PimMemFlag mflag, uintptr_t usr_ptr, bool transposed)
 {
     void* user = (usr_ptr == 0) ? nullptr : (void*)usr_ptr;
-    return PimCreateBo(desc, mem, mflag, user);
+    return PimCreateBo(desc, mem, mflag, user, transposed);
 }
 
-PimBo* PyWrapperPimCreateBoGemmDesc(PimGemmDesc* desc, PimMemType mem, PimMemFlag mflag, uintptr_t usr_ptr)
+PimBo* PyWrapperPimCreateBoGemmDesc(PimGemmDesc* desc, PimMemType mem, PimMemFlag mflag, uintptr_t usr_ptr, bool transposed)
 {
     void* user = (usr_ptr == 0) ? nullptr : (void*)usr_ptr;
-    return PimCreateBo(desc, mem, mflag, user);
+    return PimCreateBo(desc, mem, mflag, user, transposed);
 }
 
 int PyWrapperPimAllocMemory(uintptr_t usr_ptr, size_t size, PimMemType mem)
@@ -36,6 +36,11 @@ PYBIND11_MODULE(pim_api, api_interface)
     py::enum_<PimRuntimeType>(api_interface, "PimRuntimeType")
         .value("RT_TYPE_HIP", RT_TYPE_HIP)
         .value("RT_TYPE_OPENCL", RT_TYPE_OPENCL)
+        .export_values();
+
+    py::enum_<PimGemmOrder>(api_interface, "PimGemmOrder")
+        .value("W_X_I", W_X_I)
+        .value("I_X_W", I_X_W)
         .export_values();
 
     py::enum_<PimMemType>(api_interface, "PimMemType")
@@ -58,6 +63,12 @@ PYBIND11_MODULE(pim_api, api_interface)
     py::enum_<PimActFunc>(api_interface, "PimActFunc")
         .value("NONE", NONE)
         .value("ACT_RELU", ACT_RELU)
+        .export_values();
+
+    py::enum_<PimDataLayoutType  >(api_interface, "PimDataLayoutType")
+        .value("RAW", RAW)
+        .value("CHWISE_GEMM_WEIGHT", CHWISE_GEMM_WEIGHT)
+        .value("ALIGNED_GEMM_WEIGHT", ALIGNED_GEMM_WEIGHT)
         .export_values();
 
     py::enum_<PimMemCpyType>(api_interface, "PimMemCpyType")
@@ -127,7 +138,8 @@ PYBIND11_MODULE(pim_api, api_interface)
         .def_readwrite("bias_bshape_r", &PimGemmDesc::bias_bshape_r)
         .def_readwrite("out_bshape", &PimGemmDesc::out_bshape)
         .def_readwrite("out_bshape_r", &PimGemmDesc::out_bshape_r)
-	.def_readwrite("precision", &PimGemmDesc::precision);
+        .def_readwrite("precision", &PimGemmDesc::precision)
+        .def_readwrite("gemm_order", &PimGemmDesc::gemm_order);
 
     api_interface.def("PimInitialize", &PimInitialize, "For initialization of pim data",
                       py::arg("rt_type") = RT_TYPE_HIP, py::arg("PimPrecision") = PIM_FP16);
@@ -136,10 +148,10 @@ PYBIND11_MODULE(pim_api, api_interface)
 		      py::return_value_policy::reference, "For Creating PimBo memory object using nchw values");
     api_interface.def("PimCreateBo", &PyWrapperPimCreateBoDesc,
                       py::return_value_policy::reference, "For Creating PimBo memory object", py::arg("desc"),
-                      py::arg("mem"), py::arg("mflag") = ELT_OP, py::arg("usr_ptr") = 0);
+                      py::arg("mem"), py::arg("mflag") = ELT_OP, py::arg("usr_ptr") = 0, py::arg("transposed"));
     api_interface.def("PimCreateBo", &PyWrapperPimCreateBoGemmDesc,
                       py::return_value_policy::reference, "For Creating PimBo memory object", py::arg("desc"),
-                      py::arg("mem"), py::arg("mflag"), py::arg("usr_ptr") = 0);
+                      py::arg("mem"), py::arg("mflag"), py::arg("usr_ptr") = 0, py::arg("transposed"));
     api_interface.def("PimDestroyBo", static_cast<int (*)(PimBo*)>(&PimDestroyBo));
     api_interface.def("PimCreateDesc", &PimCreateDesc, py::return_value_policy::reference);
     api_interface.def("PimCreateGemmDesc", &PimCreateGemmDesc, py::return_value_policy::reference);
@@ -156,15 +168,10 @@ PYBIND11_MODULE(pim_api, api_interface)
     api_interface.def("PimExecuteMul", static_cast<int (*)(PimBo*, PimBo*, PimBo*, void*, bool)>(&PimExecuteMul));
     api_interface.def("PimExecuteMul", static_cast<int (*)(PimBo*, void*, PimBo*, void*, bool)>(&PimExecuteMul));
     api_interface.def("PimExecuteRelu", static_cast<int (*)(PimBo*, PimBo*, void*, bool)>(&PimExecuteRelu));
-    api_interface.def("PimExecuteGemv", static_cast<int (*)(PimBo*, PimBo*, PimBo*, void*, bool)>(&PimExecuteGemv));
-    api_interface.def("PimExecuteGemvAdd",
-                      static_cast<int (*)(PimBo*, PimBo*, PimBo*, void*, bool)>(&PimExecuteGemvAdd));
-    api_interface.def("PimExecuteGemvAdd",
-                      static_cast<int (*)(PimBo*, PimBo*, PimBo*, PimBo*, bool ,void*, bool)>(&PimExecuteGemvAdd));
-    api_interface.def("PimExecuteGemvList",
-		      static_cast<int (*)(PimBo*, PimBo*, PimBo*, void*, bool)>(&PimExecuteGemvList));
     api_interface.def("PimExecuteGemm",
-		      static_cast<int (*)(PimBo*, PimBo*, PimBo*, PimBo*, PimActFunc, void*, bool)>(&PimExecuteGemm));
+		      static_cast<int (*)(PimBo*, PimBo*, PimBo*, PimBo*, PimActFunc, PimGemmOrder, void*, bool)>(&PimExecuteGemm));
+    api_interface.def("PimConvertGemmWeight",
+		      static_cast<PimBo* (*)(PimBo*, PimGemmOrder, bool)>(&PimConvertGemmWeight));                
     api_interface.def("PimSetDevice", static_cast<int (*)(unsigned int)>(&PimSetDevice));
     api_interface.def("PimGetDevice", [](py::array_t<unsigned int> buffer){
                       py::buffer_info info = buffer.request();

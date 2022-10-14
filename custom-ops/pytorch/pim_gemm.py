@@ -5,8 +5,9 @@ import pim_api
 
 class PimGemmFunction(Function):
     @staticmethod
-    def forward(ctx, inputs, weights, bias, act, block):
+    def forward(ctx, inputs, weights, bias, act, gemm_order=pim_api.I_X_W, block=True):
 
+        transposed = False
         if inputs.ndim not in [4]:
             print("Input dimension not supported in Gemm")
             return
@@ -25,12 +26,12 @@ class PimGemmFunction(Function):
             (batch, channel, inout_h, out_w), dtype=torch.float16, device=inputs.device)
 
         #print('Custom op pimgemm descriptor (n, c, inout_h, in_w, out_w)', batch, channel, inout_h, in_w, out_w)
-        pim_gemm_desc = pim_api.PimCreateGemmDesc(batch, channel, inout_h, in_w, out_w, pim_api.PIM_FP16)
-        device_input = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_INPUT, inputs.data_ptr())
-        device_weight = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_WEIGHT, weights.data_ptr())
-        device_bias = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_BIAS, bias.data_ptr())
-        device_output = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_OUTPUT, out_tensor.data_ptr())
-        pim_api.PimExecuteGemm(device_output, device_input, device_weight, device_bias, act, None, block)
+        pim_gemm_desc = pim_api.PimCreateGemmDesc(batch, channel, inout_h, in_w, inout_h, out_w, pim_api.PIM_FP16, gemm_order)
+        device_input = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_INPUT, inputs.data_ptr(), transposed)
+        device_weight = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_WEIGHT, weights.data_ptr(), transposed)
+        device_bias = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_BIAS, bias.data_ptr(), transposed)
+        device_output = pim_api.PimCreateBo(pim_gemm_desc, pim_api.MEM_TYPE_DEVICE, pim_api.GEMM_OUTPUT, out_tensor.data_ptr(), transposed)
+        pim_api.PimExecuteGemm(device_output, device_input, device_weight, device_bias, act, gemm_order, None, block)
 
         pim_api.PimDestroyBo(device_input)
         pim_api.PimDestroyBo(device_weight)
@@ -55,5 +56,5 @@ class PimGemm(nn.Module):
     def __repr__(self):
         return "PIM Gemm layer"
 
-    def forward(self, inputs, weight, bias, act, block):
-        return PimPimGemmFunction.apply(inputs, weight, bias, act, block)
+    def forward(self, inputs, weight, bias, act, gemm_order=pim_api.I_X_W, block=True):
+        return PimPimGemmFunction.apply(inputs, weight, bias, act, gemm_order, block)

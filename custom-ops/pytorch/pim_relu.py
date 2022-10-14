@@ -13,14 +13,14 @@ class PimReluFunction(Function):
             input.size(), dtype=torch.float16, device=input.device)
 
         dev_input = pim_api.PimCreateBo(
-            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, input.data_ptr())
+            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, input.data_ptr(), False)
         dev_output = pim_api.PimCreateBo(
-            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, out_tensor.data_ptr())
+            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_DEVICE, out_tensor.data_ptr(), False)
 
         pim_input = pim_api.PimCreateBo(
-            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0)
+            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0, False)
         pim_output = pim_api.PimCreateBo(
-            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0)
+            1, 1, 1, length, pim_api.PIM_FP16, pim_api.MEM_TYPE_PIM, 0, False)
 
         pim_api.PimCopyMemory(pim_input, dev_input, pim_api.DEVICE_TO_PIM)
 

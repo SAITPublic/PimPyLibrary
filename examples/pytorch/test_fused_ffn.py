@@ -40,7 +40,7 @@ class PyFusedFFNTest(unittest.TestCase):
         pytorch_result = b2.clone()
         pytorch_result += torch.matmul(output, w2)
 
-        pim_result = pim_fused_ffn.apply(input, w1, b1, w2, b2, True)
+        pim_result = pim_fused_ffn.apply(input, w1, b1, w2, b2, pim_api.I_X_W)
         return pim_result, pytorch_result
 
 
