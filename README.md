@@ -15,18 +15,13 @@ export ROCM_PATH=<path to rocm installation>
 pip3 install --trusted-host 'pypi.org' .
 ```
 
-### Install Tensorflow custom ops
-```
-pip3 install --trusted-host 'pypi.org' custom-ops/tensorflow -v
-```
-
 ### Install Pytroch custom ops
 ```
 pip3 install --trusted-host 'pypi.org' custom-ops/pytorch
 ```
 
 ## How to test PIM custom ops
-PIM custom ops can be run with numpy and pytorch and tensorflow.
+PIM custom ops can be run with numpy and pytorch.
 ### numpy examples
 To run all numpy tests
 ```
@@ -39,8 +34,3 @@ To run all Pytorch tests
 python3 -m unittest examples/pytorch/test_*.py 
 ```
 
-### Tensorflow examples
-To run all Tensorflow tests
-```
-python3 -m unittest examples/tensorflow/test_*.py
-```
