@@ -145,13 +145,14 @@ PYBIND11_MODULE(pim_api, api_interface)
                       py::arg("rt_type") = RT_TYPE_HIP, py::arg("PimPrecision") = PIM_FP16);
     api_interface.def("PimDeinitialize", &PimDeinitialize, "For de initialization of pim data");
     api_interface.def("PimCreateBo", &PyWrapperPimCreateBoNCHW,
-		      py::return_value_policy::reference, "For Creating PimBo memory object using nchw values");
+		      py::return_value_policy::reference, "For Creating PimBo memory object using nchw values" ,
+          py::arg("n"), py::arg("c"), py::arg("h"), py::arg("w"), py::arg("prec"), py::arg("mem"), py::arg("usr_ptr")=0, py::arg("transposed") = false);
     api_interface.def("PimCreateBo", &PyWrapperPimCreateBoDesc,
                       py::return_value_policy::reference, "For Creating PimBo memory object", py::arg("desc"),
-                      py::arg("mem"), py::arg("mflag") = ELT_OP, py::arg("usr_ptr") = 0, py::arg("transposed"));
+                      py::arg("mem"), py::arg("mflag") = ELT_OP, py::arg("usr_ptr") = 0, py::arg("transposed") = false);
     api_interface.def("PimCreateBo", &PyWrapperPimCreateBoGemmDesc,
                       py::return_value_policy::reference, "For Creating PimBo memory object", py::arg("desc"),
-                      py::arg("mem"), py::arg("mflag"), py::arg("usr_ptr") = 0, py::arg("transposed"));
+                      py::arg("mem"), py::arg("mflag"), py::arg("usr_ptr") = 0, py::arg("transposed") = false);
     api_interface.def("PimDestroyBo", static_cast<int (*)(PimBo*)>(&PimDestroyBo));
     api_interface.def("PimCreateDesc", &PimCreateDesc, py::return_value_policy::reference);
     api_interface.def("PimCreateGemmDesc", &PimCreateGemmDesc, py::return_value_policy::reference);
