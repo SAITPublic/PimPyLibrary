@@ -183,7 +183,7 @@ PYBIND11_MODULE(pim_api, api_interface)
     api_interface.def("PimExecuteGemm",
 		      static_cast<int (*)(PimBo*, PimBo*, PimBo*, PimBo*, PimActFunc, PimGemmOrder, void*, bool)>(&PimExecuteGemm));
     api_interface.def("PimConvertGemmWeight",
-		      static_cast<PimBo* (*)(PimBo*, PimGemmOrder, bool)>(&PimConvertGemmWeight));                
+		      static_cast<PimBo* (*)(PimBo*, PimGemmOrder, bool, void*, bool)>(&PimConvertGemmWeight));
     api_interface.def("PimSetDevice", static_cast<int (*)(unsigned int)>(&PimSetDevice));
     api_interface.def("PimGetDevice", [](py::array_t<unsigned int> buffer){
                       py::buffer_info info = buffer.request();
