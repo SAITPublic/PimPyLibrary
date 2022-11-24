@@ -190,5 +190,5 @@ PYBIND11_MODULE(pim_api, api_interface)
                       PimGetDevice(static_cast<unsigned int *>(info.ptr));});
     api_interface.def("PimSynchronize", &PimSynchronize);
     api_interface.def("PimExecuteDummy", &PimExecuteDummy);
-    api_interface.def("createStream", static_cast<void* (*)(PimRuntimeType)>(&createStream));
+    api_interface.def("PimCreateStream", static_cast<void* (*)(PimRuntimeType)>(&PimCreateStream));
 }
